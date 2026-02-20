@@ -1,6 +1,7 @@
 import ast
 import builtins
 from pathlib import Path
+from platform import node
 from typing import Set
 
 
@@ -15,8 +16,12 @@ class FunctionAnalyzer(ast.NodeVisitor):
         self.generic_visit(node)
 
     def visit_Call(self, node):
+        # Direct function call: func()
         if isinstance(node.func, ast.Name):
             self.called_functions.add(node.func.id)
+        # Attribute call: obj.func()
+        elif isinstance(node.func, ast.Attribute):
+            self.called_functions.add(node.func.attr)
         self.generic_visit(node)
 
 
