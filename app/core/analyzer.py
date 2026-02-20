@@ -1,4 +1,5 @@
 import ast
+import builtins
 from pathlib import Path
 from typing import Set
 
@@ -53,10 +54,14 @@ class CodeAnalyzer:
             defined_all.update(analyzer.defined_functions)
             called_all.update(analyzer.called_functions)
 
-        unused = defined_all - called_all
+        # Ignore built-in functions like print, len, etc.
+        builtins_set = set(dir(builtins))
+        filtered_called = {func for func in called_all if func not in builtins_set}
+
+        unused = defined_all - filtered_called
 
         return {
             "defined": defined_all,
-            "called": called_all,
+            "called": filtered_called,
             "unused": unused
         }
