@@ -1,14 +1,9 @@
 import ast
 from pathlib import Path
-from typing import List, Set
+from typing import Set
 
 
 class FunctionAnalyzer(ast.NodeVisitor):
-    """
-    Analyzes Python source code to extract:
-    - Function definitions
-    - Function calls
-    """
 
     def __init__(self):
         self.defined_functions: Set[str] = set()
@@ -25,9 +20,6 @@ class FunctionAnalyzer(ast.NodeVisitor):
 
 
 class CodeAnalyzer:
-    """
-    Main analyzer class to detect unused functions
-    """
 
     def __init__(self, file_path: str):
         self.file_path = Path(file_path)
@@ -40,8 +32,31 @@ class CodeAnalyzer:
         analyzer.visit(tree)
 
         unused_functions = analyzer.defined_functions - analyzer.called_functions
+
         return {
             "defined": analyzer.defined_functions,
             "called": analyzer.called_functions,
             "unused": unused_functions
+        }
+
+    def analyze_project(self) -> dict:
+        defined_all = set()
+        called_all = set()
+
+        for file in self.file_path.rglob("*.py"):
+            source_code = file.read_text(encoding="utf-8")
+            tree = ast.parse(source_code)
+
+            analyzer = FunctionAnalyzer()
+            analyzer.visit(tree)
+
+            defined_all.update(analyzer.defined_functions)
+            called_all.update(analyzer.called_functions)
+
+        unused = defined_all - called_all
+
+        return {
+            "defined": defined_all,
+            "called": called_all,
+            "unused": unused
         }
