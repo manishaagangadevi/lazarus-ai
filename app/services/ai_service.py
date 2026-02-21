@@ -16,11 +16,12 @@ def analyze_function_with_ai(function_source: str) -> str:
     prompt = f"""
 You are a senior Python software engineer.
 
-Analyze this function and answer clearly:
+Analyze this function and return your answer STRICTLY in this format:
 
-1. Is it safe to remove?
-2. What risks could exist?
-3. Short explanation.
+SAFE_TO_REMOVE: (Yes / No / Conditional)
+RISK_LEVEL: (Low / Medium / High)
+CONFIDENCE_SCORE: (0-100)
+EXPLANATION: (short explanation)
 
 Function:
 {function_source}

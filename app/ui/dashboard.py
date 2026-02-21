@@ -5,6 +5,7 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
 import streamlit as st
+import json
 from app.core.analyzer import CodeAnalyzer
 from app.services.ai_service import analyze_function_with_ai
 
@@ -21,7 +22,10 @@ if st.button("Analyze Project"):
 
     if not result["unused"]:
         st.success("No unused functions detected 🎉")
+
     else:
+        st.success(f"Found {len(result['unused'])} unused function(s)")
+
         for func_name, info in result["unused"].items():
             st.subheader(f"🔎 {func_name}")
             st.write(f"📂 File: {info['file']}")
@@ -34,5 +38,15 @@ if st.button("Analyze Project"):
                 ai_response = analyze_function_with_ai(info["source"])
 
             st.markdown("### 🤖 AI Risk Analysis")
-            st.write(ai_response)
+            st.markdown(ai_response)
             st.divider()
+
+        # ✅ Download Report Button (outside loop)
+        report_data = result["unused"]
+
+        st.download_button(
+            label="📥 Download JSON Report",
+            data=json.dumps(report_data, indent=4),
+            file_name="lazarus_report.json",
+            mime="application/json"
+        )
