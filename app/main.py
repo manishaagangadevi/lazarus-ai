@@ -4,6 +4,11 @@ if __name__ == "__main__":
     analyzer = CodeAnalyzer("tests")
     result = analyzer.analyze_project()
 
-    print("Defined Functions:", result["defined"])
-    print("Called Functions:", result["called"])
-    print("Unused Functions:", result["unused"])
+    print("\nDefined Functions:")
+    print(result["defined"])
+
+    print("\nCalled Functions:")
+    print(result["called"])
+
+    print("\nUnused Functions:")
+    print(result["unused"])

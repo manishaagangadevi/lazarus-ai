@@ -5,15 +5,21 @@ from typing import Set
 
 
 class FunctionAnalyzer(ast.NodeVisitor):
+    """
+    Extracts:
+    - Function definitions (with line numbers)
+    - Function calls
+    """
 
     def __init__(self):
-        # Store function metadata
         self.defined_functions = {}
         self.called_functions: Set[str] = set()
 
     def visit_FunctionDef(self, node):
+        # Store start and end line numbers
         self.defined_functions[node.name] = {
-            "line": node.lineno
+            "line": node.lineno,
+            "end_line": node.end_lineno
         }
         self.generic_visit(node)
 
@@ -30,6 +36,9 @@ class FunctionAnalyzer(ast.NodeVisitor):
 
 
 class CodeAnalyzer:
+    """
+    Main analyzer class for project-level analysis
+    """
 
     def __init__(self, file_path: str):
         self.file_path = Path(file_path)
@@ -45,18 +54,28 @@ class CodeAnalyzer:
             analyzer = FunctionAnalyzer()
             analyzer.visit(tree)
 
-            # Store function name + file + line
+            file_lines = source_code.splitlines()
+
+            # Store function metadata + full source
             for func_name, metadata in analyzer.defined_functions.items():
+                start = metadata["line"] - 1
+                end = metadata["end_line"]
+
+                function_source = "\n".join(file_lines[start:end])
+
                 defined_all[func_name] = {
                     "file": str(file),
-                    "line": metadata["line"]
+                    "line": metadata["line"],
+                    "source": function_source
                 }
 
             called_all.update(analyzer.called_functions)
 
-        # Remove built-in functions
+        # Remove built-in functions like print, len, etc.
         builtins_set = set(dir(builtins))
-        filtered_called = {func for func in called_all if func not in builtins_set}
+        filtered_called = {
+            func for func in called_all if func not in builtins_set
+        }
 
         # Detect unused functions
         unused = {
